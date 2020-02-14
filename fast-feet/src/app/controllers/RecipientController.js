@@ -1,56 +1,116 @@
-// import * as Yup from 'yup';
-// import Recipient from '../models/Recipient';
+import * as Yup from 'yup';
+import Recipient from '../models/Recipient';
 
-class SessionController {
+class RecipientController {
   async store(req, res) {
     /**
-     * Validação dos campos de entrada
+     * Validação
      */
-    // const schema = Yup.object().shape({
-    //   email: Yup.string()
-    //     .email()
-    //     .required(),
-    //   password: Yup.string().required(),
-    // });
+    const schema = Yup.object().shape({
+      name: Yup.string().required(),
+    });
+    try {
+      await schema.validate(req.body, { abortEarly: false });
+    } catch (err) {
+      return res
+        .status(400)
+        .json({ error: 'Validation failed.', errors: err.errors });
+    }
 
-    // try {
-    //   await schema.validate(req.body, { abortEarly: false });
-    // } catch (err) {
-    //   return res
-    //     .status(400)
-    //     .json({ error: 'Validation failed.', errors: err.errors });
-    // }
+    /**
+     * Verifica se já existe
+     */
+    const exists = await Recipient.findOne({ where: { name: req.body.name } });
+    if (exists) {
+      return res.status(400).json({ error: 'Recipient already exists.' });
+    }
 
-    return res.json({ teste: 'teste' });
+    /**
+     * Cadastra
+     */
+    const {
+      id,
+      name,
+      street,
+      number,
+      compl,
+      state,
+      city,
+      zip_code,
+    } = await Recipient.create(req.body);
 
-    // const { email, password } = req.body;
+    return res.json({
+      id,
+      name,
+      street,
+      number,
+      compl,
+      state,
+      city,
+      zip_code,
+    });
+  }
 
-    // const user = await User.findOne({ where: { email } });
+  async update(req, res) {
+    /**
+     * Validação
+     */
+    const schema = Yup.object().shape({
+      name: Yup.string().max(255),
+    });
 
-    // // Verifica se o email existe
-    // if (!user) {
-    //   return res.status(401).json({ error: 'User not found' });
-    // }
+    try {
+      await schema.validate(req.body, { abortEarly: false });
+    } catch (err) {
+      return res
+        .status(400)
+        .json({ error: 'Validation failed.', errors: err.errors });
+    }
 
-    // // Verifica se a senha está correta
-    // if (!(await user.checkPassword(password))) {
-    //   return res.status(401).json({ error: 'Password does not match' });
-    // }
+    /**
+     * Verifica se o id existe
+     */
+    const recipient = await Recipient.findByPk(req.params.id);
+    if (!recipient) {
+      return res.status(400).json({ error: 'Recipient not found.' });
+    }
 
-    // const { id, name } = user;
+    const { name } = req.body;
 
-    // // Retorna o usuário + um token JWT
-    // return res.json({
-    //   user: {
-    //     id,
-    //     name,
-    //     email,
-    //   },
-    //   token: jwt.sign({ id }, authConfig.secret, {
-    //     expiresIn: authConfig.expiresIn,
-    //   }),
-    // });
+    /**
+     * Verifica se o nome já existe
+     */
+    if (name && name !== recipient.name) {
+      const exists = await Recipient.findOne({ where: { name } });
+      if (exists) {
+        return res.status(400).json({ error: 'Recipient already exists.' });
+      }
+    }
+
+    /**
+     * Update
+     */
+    const {
+      id,
+      street,
+      number,
+      compl,
+      state,
+      city,
+      zip_code,
+    } = await recipient.update(req.body);
+
+    return res.status(200).json({
+      id,
+      name,
+      street,
+      number,
+      compl,
+      state,
+      city,
+      zip_code,
+    });
   }
 }
 
-export default new SessionController();
+export default new RecipientController();

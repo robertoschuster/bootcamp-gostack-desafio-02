@@ -1,9 +1,10 @@
 import Sequelize from 'sequelize';
 import databaseConfig from '../config/database';
 import User from '../app/models/User';
+import Recipient from '../app/models/Recipient';
 
 // Array para registrar todos os models da aplicação
-const models = [User];
+const models = [User, Recipient];
 
 class Database {
   constructor() {
