@@ -5,9 +5,18 @@ class RecipientController {
   async store(req, res) {
     /**
      * Validação
+     * (Utilizado o validate em vez do isValid para poder retornar os erros)
      */
     const schema = Yup.object().shape({
-      name: Yup.string().required(),
+      name: Yup.string()
+        .max(255)
+        .required(),
+      street: Yup.string().max(255),
+      number: Yup.string().max(255),
+      compl: Yup.string().max(255),
+      state: Yup.string().max(2),
+      city: Yup.string().max(255),
+      zip_code: Yup.string().max(255),
     });
     try {
       await schema.validate(req.body, { abortEarly: false });
@@ -54,9 +63,16 @@ class RecipientController {
   async update(req, res) {
     /**
      * Validação
+     * (Utilizado o validate em vez do isValid para poder retornar os erros)
      */
     const schema = Yup.object().shape({
       name: Yup.string().max(255),
+      street: Yup.string().max(255),
+      number: Yup.string().max(255),
+      compl: Yup.string().max(255),
+      state: Yup.string().max(2),
+      city: Yup.string().max(255),
+      zip_code: Yup.string().max(255),
     });
 
     try {
